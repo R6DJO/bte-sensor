@@ -100,15 +100,15 @@ modbus_status_t msg_validate(UART_message *msg)
 {
     if (msg->msg_length < 4)
     {
-        return ERR;
+        return MB_ERR;
     }
     uint16_t crc = MODBUS_CRC16(msg->msg_data, msg->msg_length - 2);
     uint16_t msg_crc = (msg->msg_data[msg->msg_length - 2]) | (msg->msg_data[msg->msg_length - 1] << 8);
     if (crc != msg_crc)
     {
-        return ERR;
+        return MB_ERR;
     }
-    return OK;
+    return MB_OK;
 }
 
 modbus_status_t msg_parse(UART_message *buf, MODBUS_message *rx_msg)
@@ -149,7 +149,7 @@ modbus_status_t msg_parse(UART_message *buf, MODBUS_message *rx_msg)
     }
 
     rx_msg->crc = (buf->msg_data[buf->msg_length - 2]) | (buf->msg_data[buf->msg_length - 1] << 8);
-    return OK;
+    return MB_OK;
 }
 
 modbus_status_t address_validate(MODBUS_message *rx_msg, MODBUS_registers *registers)
@@ -160,68 +160,68 @@ modbus_status_t address_validate(MODBUS_message *rx_msg, MODBUS_registers *regis
         if (rx_msg->start_address >= registers->DO_start_address &&
             rx_msg->start_address + rx_msg->data_length < registers->DO_start_address + registers->DO_count)
         {
-            return OK;
+            return MB_OK;
         }
         break;
     case READ_DI:
         if (rx_msg->start_address >= registers->DI_start_address &&
             rx_msg->start_address + rx_msg->data_length < registers->DI_start_address + registers->DI_count)
         {
-            return OK;
+            return MB_OK;
         }
         break;
     case READ_AO:
         if (rx_msg->start_address >= registers->AO_start_address &&
             rx_msg->start_address + rx_msg->data_length < registers->AO_start_address + registers->AO_count)
         {
-            return OK;
+            return MB_OK;
         }
         break;
     case READ_AI:
         if (rx_msg->start_address >= registers->AI_start_address &&
             rx_msg->start_address + rx_msg->data_length < registers->AI_start_address + registers->AI_count)
         {
-            return OK;
+            return MB_OK;
         }
         break;
     case WRITE_DO:
         if (rx_msg->start_address >= registers->DO_start_address &&
             rx_msg->start_address < registers->DO_start_address + registers->DO_count)
         {
-            return OK;
+            return MB_OK;
         }
         break;
     case WRITE_AO:
         if (rx_msg->start_address >= registers->AO_start_address &&
             rx_msg->start_address < registers->AO_start_address + registers->AO_count)
         {
-            return OK;
+            return MB_OK;
         }
         break;
     case READ_EXCEPTION:
-        return OK;
+        return MB_OK;
         break;
     case DIAGNOSTIC:
-        return OK;
+        return MB_OK;
         break;
     case WRITE_DO_MULTI:
         if (rx_msg->start_address >= registers->DO_start_address &&
             rx_msg->start_address + rx_msg->data_length < registers->DO_start_address + registers->DO_count)
         {
-            return OK;
+            return MB_OK;
         }
         break;
     case WRITE_AO_MULTI:
         if (rx_msg->start_address >= registers->AO_start_address &&
             rx_msg->start_address + rx_msg->data_length < registers->AO_start_address + registers->AO_count)
         {
-            return OK;
+            return MB_OK;
         }
         break;
     default:
-        return OK;
+        return MB_OK;
     }
-    return ERR;
+    return MB_ERR;
 }
 
 modbus_status_t response_prepare(MODBUS_message *rx_msg, MODBUS_registers *registers, UART_message *tx_buf)
@@ -345,7 +345,7 @@ modbus_status_t response_prepare(MODBUS_message *rx_msg, MODBUS_registers *regis
     tx_buf->msg_data[tx_buf->msg_length++] = crc & 0xFF;
     tx_buf->msg_data[tx_buf->msg_length++] = crc >> 8;
 
-    return OK;
+    return MB_OK;
 }
 
 //

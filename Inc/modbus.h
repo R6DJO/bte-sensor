@@ -21,7 +21,7 @@
 #define BUFFER_SIZE 64
 
 typedef enum {
-	ERR, OK, WRONG_ADDRESS, WRONG_COMMAND
+	MB_ERR, MB_OK, WRONG_ADDRESS, WRONG_COMMAND
 } modbus_status_t;
 
 typedef enum {

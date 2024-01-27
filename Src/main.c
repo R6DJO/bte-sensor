@@ -171,7 +171,7 @@ int main(void)
             HAL_UART_Transmit_IT(&huart2, parse_buffer->msg_data, parse_buffer->msg_length);
 
             uint8_t status = process_buffer();
-            if (status == ERR)
+            if (status == MB_ERR)
             {
                 __NOP();
             }
@@ -247,18 +247,18 @@ uint8_t process_buffer()
 
     HAL_UART_Transmit_IT(&huart2, parse_buffer->msg_data, parse_buffer->msg_length);
 
-    if (msg_validate(parse_buffer) == ERR)
+    if (msg_validate(parse_buffer) == MB_ERR)
     {
-        return ERR;
+        return MB_ERR;
     }
     msg_parse(parse_buffer, &rx_msg);
     status = response_prepare(&rx_msg, &registers, &tx_buf);
-    if (status == ERR)
+    if (status == MB_ERR)
     {
-        return ERR;
+        return MB_ERR;
     }
 
-    return OK;
+    return MB_OK;
 }
 
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
