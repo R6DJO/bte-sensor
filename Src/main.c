@@ -128,6 +128,7 @@ int main(void)
     UART_message test_uart_tx_msg = {0};
     MODBUS_message test_modbus_msg = {0};
     MODBUS_registers test_registers = {0};
+    test_registers.MB_address = 0x01;
     test_registers.DO_start_address = 0x0100;
     test_registers.DI_start_address = 0x0200;
     test_registers.AO_start_address = 0x0300;
