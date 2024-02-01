@@ -349,7 +349,7 @@ modbus_status_t response_prepare(MODBUS_message *rx_msg, MODBUS_registers *regis
     return MB_OK;
 }
 
-modbus_status_t prepare_request_registers(uint8_t device_address, uint8_t command, uint16_t start_address,
+modbus_status_t prepare_request_mbmsg(uint8_t device_address, uint8_t command, uint16_t start_address,
                                           uint16_t count, UART_message *tx_buf)
 {
     tx_buf->msg_length = 0;
@@ -365,7 +365,7 @@ modbus_status_t prepare_request_registers(uint8_t device_address, uint8_t comman
     return MB_OK;
 }
 
-modbus_status_t prepare_request_registers(MODBUS_message *request, UART_message *tx_buf)
+modbus_status_t prepare_request_mbmsg(MODBUS_message *request, UART_message *tx_buf)
 {
     tx_buf->msg_length = 0;
     tx_buf->msg_data[tx_buf->msg_length++] = request->device_address;
@@ -382,17 +382,42 @@ modbus_status_t prepare_request_registers(MODBUS_message *request, UART_message 
 
 modbus_status_t response_processing(MODBUS_message *response, MODBUS_message *request, MODBUS_registers *registers)
 {
-    // AI[0] - current light level
-    // AO[1] - light threshold
-    // DO[0].0 - mode 1-automatic/0-manual
-    // DO[1].0 - light 1-on/0-off
-    if(response->device_address!=request->device_address)
+    if (response->device_address != request->device_address)
     {
         return WRONG_ADDRESS;
     }
-    if(response->command!=request->command)
+    if (response->command != request->command)
     {
         return WRONG_COMMAND;
+    }
+    if (response->command == (request->command) | 0x80)
+    {
+        return WRONG_REGISTER;
+    }
+    switch (response->command)
+    {
+    case READ_DO:
+        break;
+    case READ_DI:
+        break;
+    case READ_AO:
+        break;
+    case READ_AI:
+        break;
+    case WRITE_DO:
+        break;
+    case WRITE_AO:
+        break;
+    case READ_EXCEPTION:
+        break;
+    case DIAGNOSTIC:
+        break;
+    case WRITE_DO_MULTI:
+        break;
+    case WRITE_AO_MULTI:
+        break;
+    default:
+        return MB_OK;
     }
     return MB_OK;
 }
