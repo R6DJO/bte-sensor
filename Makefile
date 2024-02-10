@@ -13,7 +13,7 @@
 ######################################
 # target
 ######################################
-TARGET = f103mb2
+TARGET = bte-sensor
 
 
 ######################################
@@ -28,8 +28,6 @@ OPT = -Og
 #######################################
 # paths
 #######################################
-NPROCS = $(nproc)
-MAKEFLAGS += -j$(NPROCS)
 # Build path
 BUILD_DIR = build
 
@@ -206,3 +204,24 @@ clean:
 -include $(wildcard $(BUILD_DIR)/*.d)
 
 # *** EOF ***
+
+NPROCS = $(nproc)
+MAKEFLAGS += -j$(NPROCS)
+
+# Flash with J-Link
+# Configure device name, everything else should remain the same
+jflash: $(BUILD_DIR)/jflash
+	JLinkExe -commanderscript $<
+# Change to yours
+DEVICE = STM32F103C8
+# First create a file with all commands
+$(BUILD_DIR)/jflash: $(BUILD_DIR)/$(TARGET).bin
+	@touch $@
+	@echo device $(DEVICE) > $@
+	@echo si swd >> $@
+	@echo speed 4000 >> $@
+	@echo erase >> $@
+	@echo loadbin $< 0x8000000 >> $@
+	@echo r >> $@
+	@echo go >> $@
+	@echo exit >> $@

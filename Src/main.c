@@ -27,6 +27,7 @@
 /* USER CODE BEGIN Includes */
 #include "lcu.h"
 #include "modbus.h"
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
 /* USER CODE END Includes */
@@ -51,6 +52,7 @@
 /* USER CODE BEGIN PV */
 extern DMA_HandleTypeDef hdma_usart2_rx;
 extern DMA_HandleTypeDef hdma_usart3_rx;
+
 volatile uint8_t process_it = false;
 uint16_t adc = 0xFFFF;
 char tmp_str[64] = {0};
@@ -58,7 +60,7 @@ char tmp_str[64] = {0};
 // AO[1] - light threshold
 // DO[0].0 - mode 1-automatic/0-manual
 // DO[1].0 - light 1-on/0-off
-MODBUS_registers registers;
+MODBUS_registers LCU_registers;
 UART_message rx1_buf;
 UART_message rx2_buf;
 UART_message tx_buf;
@@ -114,8 +116,8 @@ int main(void)
     /* USER CODE BEGIN 2 */
     HAL_ADCEx_Calibration_Start(&hadc1);
 
-    HAL_UARTEx_ReceiveToIdle_DMA(&huart2, rx_buffer->msg_data, BUFFER_SIZE);
-    __HAL_DMA_DISABLE_IT(&hdma_usart2_rx, DMA_IT_HT);
+    HAL_UARTEx_ReceiveToIdle_DMA(&huart3, rx_buffer->msg_data, BUFFER_SIZE);
+    __HAL_DMA_DISABLE_IT(&hdma_usart3_rx, DMA_IT_HT);
 
     /* TEST BLOCK START */
     //	  READ_DO = 1,
@@ -157,6 +159,24 @@ int main(void)
     status = response_prepare(&test_modbus_msg, &test_registers, &test_uart_tx_msg);
     __NOP();
     /* TEST BLOCK END */
+
+    LCU_registers.MB_address = 0x01;
+    LCU_registers.DO_start_address = 0x0100;
+    LCU_registers.DI_start_address = 0x0200;
+    LCU_registers.AO_start_address = 0x0300;
+    LCU_registers.AI_start_address = 0x0400;
+    LCU_registers.DO_count = 8;
+    LCU_registers.DI_count = 8;
+    LCU_registers.AO_count = 8;
+    LCU_registers.AI_count = 8;
+    for (uint8_t i = 0; i < 8; i++)
+    {
+        LCU_registers.DO[i] = i;
+        LCU_registers.DI[i] = i + 16;
+        LCU_registers.AO[i] = i + 32;
+        LCU_registers.AI[i] = i + 64;
+    }
+
     /* USER CODE END 2 */
 
     /* Infinite loop */
@@ -169,15 +189,24 @@ int main(void)
         if (process_it)
         {
             process_it = false;
-            HAL_UART_Transmit_IT(&huart2, parse_buffer->msg_data, parse_buffer->msg_length);
-
+            hex_to_string(parse_buffer->msg_data, parse_buffer->msg_length, tmp_str);
+#ifdef DEBUG
+            UART_Printf("MSG recived: %s\n", tmp_str);
+#endif
             uint8_t status = process_buffer();
             if (status == MB_ERR)
             {
+#ifdef DEBUG
+                UART_Printf("Error in recived msg\n");
+#endif
                 __NOP();
             }
+            else
+            {
+                HAL_UART_Transmit_IT(&huart3, tx_buf.msg_data, tx_buf.msg_length);
+            }
         }
-        light_level_update(&registers);
+        light_level_update(&LCU_registers);
     }
     /* USER CODE END 3 */
 }
@@ -235,8 +264,7 @@ uint16_t get_light_level()
     uint16_t adc = HAL_ADC_GetValue(&hadc1);
     HAL_ADC_Stop(&hadc1);
 #ifdef DEBUG
-    snprintf(tmp_str, 63, "ADC: %d\n", adc / 655);
-    HAL_UART_Transmit(&huart2, (uint8_t *)tmp_str, strlen(tmp_str), 1000);
+    UART_Printf("ADC: %d\n", adc / 655);
 #endif // DEBUG
     return adc;
 }
@@ -245,14 +273,22 @@ uint8_t process_buffer()
 {
     modbus_status_t status;
 
-    HAL_UART_Transmit_IT(&huart2, parse_buffer->msg_data, parse_buffer->msg_length);
+#ifdef DEBUG
+    UART_Printf("msg->length: %d\n", parse_buffer->msg_length);
+#endif // DEBUG
 
     if (msg_validate(parse_buffer) == MB_ERR)
     {
+#ifdef DEBUG
+        UART_Printf("msg invalid CRC\n");
+#endif // DEBUG
         return MB_ERR;
     }
+#ifdef DEBUG
+    UART_Printf("msg valid CRC\n");
+#endif // DEBUG
     msg_parse(parse_buffer, &rx_msg);
-    status = response_prepare(&rx_msg, &registers, &tx_buf);
+    status = response_prepare(&rx_msg, &LCU_registers, &tx_buf);
     if (status == MB_ERR)
     {
         return MB_ERR;
@@ -261,9 +297,29 @@ uint8_t process_buffer()
     return MB_OK;
 }
 
+void hex_to_string(uint8_t *buffer, uint8_t size, char *result)
+{
+    sprintf(result, "[ ");
+    for (int i = 0; i < size; i++)
+    {
+        sprintf(result + i * 5 + 2, "0x%02X ", buffer[i]);
+    }
+    strcat(result, "]");
+}
+
+void UART_Printf(const char *fmt, ...)
+{
+    char buff[256];
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(buff, sizeof(buff), fmt, args);
+    HAL_UART_Transmit(&huart2, (uint8_t *)buff, strlen(buff), HAL_MAX_DELAY);
+    va_end(args);
+}
+
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 {
-    if (huart->Instance == USART2)
+    if (huart->Instance == USART3)
     {
         rx_buffer->msg_length = Size;
         rx_buffer->msg_data[Size] = '\0';
@@ -271,8 +327,8 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
         rx_buffer = parse_buffer;
         parse_buffer = tmp;
         process_it = true;
-        HAL_UARTEx_ReceiveToIdle_DMA(&huart2, rx_buffer->msg_data, BUFFER_SIZE);
-        __HAL_DMA_DISABLE_IT(&hdma_usart2_rx, DMA_IT_HT);
+        HAL_UARTEx_ReceiveToIdle_DMA(&huart3, rx_buffer->msg_data, BUFFER_SIZE);
+        __HAL_DMA_DISABLE_IT(&hdma_usart3_rx, DMA_IT_HT);
     }
 }
 /* USER CODE END 4 */

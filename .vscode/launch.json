@@ -2,7 +2,67 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Cortex Debug",
+            "name": "JLink Debug",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceRoot}/build/${workspaceFolderBasename}.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "device": "STM32F103C8",
+            "runToEntryPoint": "main",
+            "preLaunchTask" : "Build",
+            "showDevDebugOutput": "parsed",
+            "servertype": "jlink",
+            "svdFile" : "${workspaceRoot}/STM32F103.svd",
+            "swoConfig":
+            {
+                "enabled": true,
+                // "cpuFrequency": 16000000,
+                "swoFrequency": 4000000,
+                "source": "probe",
+                "decoders":
+                [
+                    {
+                        "label": "ITM port 0 output",
+                        "type": "console",
+                        "port": 0,
+                        "showOnStartup": true,
+                        "encoding": "ascii"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "JLink Attach",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceRoot}/build/${workspaceFolderBasename}.elf",
+            "request": "attach",
+            "type": "cortex-debug",
+            "device": "STM32F103C8",
+            "runToEntryPoint": "main",
+            "preLaunchTask" : "Build",
+            "showDevDebugOutput": "parsed",
+            "servertype": "jlink",
+            "svdFile" : "${workspaceRoot}/STM32F103.svd",
+            "swoConfig":
+            {
+                "enabled": true,
+                // "cpuFrequency": 16000000,
+                "swoFrequency": 4000000,
+                "source": "probe",
+                "decoders":
+                [
+                    {
+                        "label": "ITM port 0 output",
+                        "type": "console",
+                        "port": 0,
+                        "showOnStartup": true,
+                        "encoding": "ascii"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "ST-Link Debug",
             "cwd": "${workspaceFolder}",
             "executable": "${workspaceRoot}/build/${workspaceFolderBasename}.elf",
             "request": "launch",
@@ -11,7 +71,7 @@
             "servertype": "stutil",
             "preLaunchTask" : "Build",
             "preRestartCommands" : [ "load", "enable breakpoint", "monitor reset" ],
-            "showDevDebugOutput" : "none",
+            "showDevDebugOutput" : "parsed",
             "svdFile" : "${workspaceRoot}/STM32F103.svd"
         }
     ]

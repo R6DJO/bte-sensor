@@ -1,3 +1,11 @@
 {
-    "cmake.configureOnOpen": false
+    "cmake.configureOnOpen": false,
+    "files.associations": {
+        "usart.h": "c",
+        "main.h": "c"
+    },
+    "cortex-debug.variableUseNaturalFormat": false,
+    "cortex-debug.JLinkGDBServerPath": "/usr/bin/JLinkGDBServer",
+    "cortex-debug.gdbPath": "/home/r6djo/stm32/gcc-arm-none-eabi/bin/arm-none-eabi-gdb",
+    "cortex-debug.stlinkPath": "/usr/bin/st-util"
 }
