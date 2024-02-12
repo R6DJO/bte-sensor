@@ -34,7 +34,6 @@
       "args": [
         "--reset",
         "write",
-        // "${input:workspaceFolderForwardSlash}/build/${workspaceFolderBasename}.bin",
         "${workspaceFolder}/build/${workspaceFolderBasename}.bin",
         "0x8000000"
       ],

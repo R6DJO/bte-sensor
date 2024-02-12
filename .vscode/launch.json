@@ -71,7 +71,20 @@
             "servertype": "stutil",
             "preLaunchTask" : "Build",
             "preRestartCommands" : [ "load", "enable breakpoint", "monitor reset" ],
-            "showDevDebugOutput" : "parsed",
+            "showDevDebugOutput" : "none",
+            "svdFile" : "${workspaceRoot}/STM32F103.svd"
+        },
+        {
+            "name": "ST-Link Attach",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceRoot}/build/${workspaceFolderBasename}.elf",
+            "request": "attach",
+            "type": "cortex-debug",
+            "runToEntryPoint": "main",
+            "servertype": "stutil",
+            "preLaunchTask" : "Build",
+            "preRestartCommands" : [ "load", "enable breakpoint", "monitor reset" ],
+            "showDevDebugOutput" : "none",
             "svdFile" : "${workspaceRoot}/STM32F103.svd"
         }
     ]

@@ -63,7 +63,8 @@ char tmp_str[64] = {0};
 MODBUS_registers LCU_registers;
 UART_message rx1_buf;
 UART_message rx2_buf;
-UART_message tx_buf;
+UART_message tx1_buf;
+UART_message *tx_buffer=&tx1_buf;
 UART_message *rx_buffer = &rx1_buf;
 UART_message *parse_buffer = &rx2_buf;
 MODBUS_message rx_msg;
@@ -189,9 +190,9 @@ int main(void)
         if (process_it)
         {
             process_it = false;
-            hex_to_string(parse_buffer->msg_data, parse_buffer->msg_length, tmp_str);
 #ifdef DEBUG
-            UART_Printf("MSG recived: %s\n", tmp_str);
+            hex_buf_to_string(parse_buffer->msg_data, parse_buffer->msg_length, tmp_str);
+            UART_Printf("--==--\nMSG recived:    %s\n", tmp_str);
 #endif
             uint8_t status = process_buffer();
             if (status == MB_ERR)
@@ -203,7 +204,11 @@ int main(void)
             }
             else
             {
-                HAL_UART_Transmit_IT(&huart3, tx_buf.msg_data, tx_buf.msg_length);
+#ifdef DEBUG
+                hex_buf_to_string(tx_buffer->msg_data, parse_buffer->msg_length, tmp_str);
+                UART_Printf("MSG transmited: %s\n--==--\n", tmp_str);
+#endif
+                HAL_UART_Transmit_IT(&huart3, tx_buffer->msg_data, tx_buffer->msg_length);
             }
         }
         light_level_update(&LCU_registers);
@@ -273,9 +278,9 @@ uint8_t process_buffer()
 {
     modbus_status_t status;
 
-#ifdef DEBUG
-    UART_Printf("msg->length: %d\n", parse_buffer->msg_length);
-#endif // DEBUG
+// #ifdef DEBUG
+//     UART_Printf("msg->length: %d\n", parse_buffer->msg_length);
+// #endif // DEBUG
 
     if (msg_validate(parse_buffer) == MB_ERR)
     {
@@ -284,11 +289,11 @@ uint8_t process_buffer()
 #endif // DEBUG
         return MB_ERR;
     }
-#ifdef DEBUG
-    UART_Printf("msg valid CRC\n");
-#endif // DEBUG
+// #ifdef DEBUG
+//     UART_Printf("msg valid CRC\n");
+// #endif // DEBUG
     msg_parse(parse_buffer, &rx_msg);
-    status = response_prepare(&rx_msg, &LCU_registers, &tx_buf);
+    status = response_prepare(&rx_msg, &LCU_registers, tx_buffer);
     if (status == MB_ERR)
     {
         return MB_ERR;
@@ -297,7 +302,7 @@ uint8_t process_buffer()
     return MB_OK;
 }
 
-void hex_to_string(uint8_t *buffer, uint8_t size, char *result)
+void hex_buf_to_string(uint8_t *buffer, uint8_t size, char *result)
 {
     sprintf(result, "[ ");
     for (int i = 0; i < size; i++)
