@@ -55,7 +55,7 @@ extern DMA_HandleTypeDef hdma_usart3_rx;
 
 volatile uint8_t process_it = false;
 uint16_t adc = 0xFFFF;
-char tmp_str[64] = {0};
+char tmp_str[256] = {0};
 // AI[0] - current light level
 // AO[1] - light threshold
 // DO[0].0 - mode 1-automatic/0-manual
@@ -125,40 +125,40 @@ int main(void)
     //		READ_DI,
     //		READ_AO,
     //		READ_AI,
-    uint8_t nData[32] = {0x01, WRITE_AO_MULTI, 0x03, 0x02, 0x00, 0x02, 0x4, 0xaa, 0xbb, 0xcc, 0xdd};
-    uint8_t wLength = 11;
-    UART_message test_uart_rx_msg = {0};
-    UART_message test_uart_tx_msg = {0};
-    MODBUS_message test_modbus_msg = {0};
-    MODBUS_registers test_registers = {0};
-    test_registers.MB_address = 0x01;
-    test_registers.DO_start_address = 0x0100;
-    test_registers.DI_start_address = 0x0200;
-    test_registers.AO_start_address = 0x0300;
-    test_registers.AI_start_address = 0x0400;
-    test_registers.DO_count = 8;
-    test_registers.DI_count = 8;
-    test_registers.AO_count = 8;
-    test_registers.AI_count = 8;
-    for (uint8_t i = 0; i < 8; i++)
-    {
-        test_registers.DO[i] = i;
-        test_registers.DI[i] = i + 16;
-        test_registers.AO[i] = i + 32;
-        test_registers.AI[i] = i + 64;
-    }
-    uint16_t myCRC = MODBUS_CRC16(nData, wLength);
-    nData[wLength++] = myCRC & 0xFF;
-    nData[wLength++] = myCRC >> 8;
-    test_uart_rx_msg.msg_length = wLength;
-    for (uint8_t i = 0; i < 32; i++)
-    {
-        test_uart_rx_msg.msg_data[i] = nData[i];
-    }
-    uint8_t status = msg_validate(&test_uart_rx_msg);
-    msg_parse(&test_uart_rx_msg, &test_modbus_msg);
-    status = response_prepare(&test_modbus_msg, &test_registers, &test_uart_tx_msg);
-    __NOP();
+    // uint8_t nData[32] = {0x01, WRITE_AO_MULTI, 0x03, 0x02, 0x00, 0x02, 0x4, 0xaa, 0xbb, 0xcc, 0xdd};
+    // uint8_t wLength = 11;
+    // UART_message test_uart_rx_msg = {0};
+    // UART_message test_uart_tx_msg = {0};
+    // MODBUS_message test_modbus_msg = {0};
+    // MODBUS_registers test_registers = {0};
+    // test_registers.MB_address = 0x01;
+    // test_registers.DO_start_address = 0x0100;
+    // test_registers.DI_start_address = 0x0200;
+    // test_registers.AO_start_address = 0x0300;
+    // test_registers.AI_start_address = 0x0400;
+    // test_registers.DO_count = 8;
+    // test_registers.DI_count = 8;
+    // test_registers.AO_count = 8;
+    // test_registers.AI_count = 8;
+    // for (uint8_t i = 0; i < 8; i++)
+    // {
+    //     test_registers.DO[i] = i;
+    //     test_registers.DI[i] = i + 16;
+    //     test_registers.AO[i] = i + 32;
+    //     test_registers.AI[i] = i + 64;
+    // }
+    // uint16_t myCRC = MODBUS_CRC16(nData, wLength);
+    // nData[wLength++] = myCRC & 0xFF;
+    // nData[wLength++] = myCRC >> 8;
+    // test_uart_rx_msg.msg_length = wLength;
+    // for (uint8_t i = 0; i < 32; i++)
+    // {
+    //     test_uart_rx_msg.msg_data[i] = nData[i];
+    // }
+    // uint8_t status = msg_validate(&test_uart_rx_msg);
+    // msg_parse(&test_uart_rx_msg, &test_modbus_msg);
+    // status = response_prepare(&test_modbus_msg, &test_registers, &test_uart_tx_msg);
+    // __NOP();
     /* TEST BLOCK END */
 
     LCU_registers.MB_address = 0x01;
@@ -195,7 +195,7 @@ int main(void)
             UART_Printf("--==--\nMSG recived:    %s\n", tmp_str);
 #endif
             uint8_t status = process_buffer();
-            if (status == MB_ERR)
+            if (status != MB_OK)
             {
 #ifdef DEBUG
                 UART_Printf("Error in recived msg\n");
@@ -205,8 +205,9 @@ int main(void)
             else
             {
 #ifdef DEBUG
-                hex_buf_to_string(tx_buffer->msg_data, parse_buffer->msg_length, tmp_str);
-                UART_Printf("MSG transmited: %s\n--==--\n", tmp_str);
+                hex_buf_to_string(tx_buffer->msg_data, tx_buffer->msg_length, tmp_str);
+                UART_Printf("MSG transmited: %s\n", tmp_str);
+                UART_Printf("msg length=%hu\n--==--\n", tx_buffer->msg_length);
 #endif
                 HAL_UART_Transmit_IT(&huart3, tx_buffer->msg_data, tx_buffer->msg_length);
             }
@@ -269,7 +270,8 @@ uint16_t get_light_level()
     uint16_t adc = HAL_ADC_GetValue(&hadc1);
     HAL_ADC_Stop(&hadc1);
 #ifdef DEBUG
-    UART_Printf("ADC: %d\n", adc / 655);
+    // UART_Printf("ADC: %hu [ 0x%04X ]\n", adc / 655, adc);
+    UART_Printf("RAW ADC: 0x%04X\n", adc);
 #endif // DEBUG
     return adc;
 }

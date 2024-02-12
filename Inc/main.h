@@ -31,7 +31,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-void hex_to_string(uint8_t *buffer, uint8_t size, char *result);
+void hex_buf_to_string(uint8_t *buffer, uint8_t size, char *result);
 void UART_Printf(const char* fmt, ...);
 /* USER CODE END Includes */
 
