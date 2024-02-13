@@ -64,7 +64,7 @@ MODBUS_registers LCU_registers;
 UART_message rx1_buf;
 UART_message rx2_buf;
 UART_message tx1_buf;
-UART_message *tx_buffer=&tx1_buf;
+UART_message *tx_buffer = &tx1_buf;
 UART_message *rx_buffer = &rx1_buf;
 UART_message *parse_buffer = &rx2_buf;
 MODBUS_message rx_msg;
@@ -280,9 +280,9 @@ uint8_t process_buffer()
 {
     modbus_status_t status;
 
-// #ifdef DEBUG
-//     UART_Printf("msg->length: %d\n", parse_buffer->msg_length);
-// #endif // DEBUG
+    // #ifdef DEBUG
+    //     UART_Printf("msg->length: %d\n", parse_buffer->msg_length);
+    // #endif // DEBUG
 
     if (msg_validate(parse_buffer) == MB_ERR)
     {
@@ -291,9 +291,9 @@ uint8_t process_buffer()
 #endif // DEBUG
         return MB_ERR;
     }
-// #ifdef DEBUG
-//     UART_Printf("msg valid CRC\n");
-// #endif // DEBUG
+    // #ifdef DEBUG
+    //     UART_Printf("msg valid CRC\n");
+    // #endif // DEBUG
     msg_parse(parse_buffer, &rx_msg);
     status = response_prepare(&rx_msg, &LCU_registers, tx_buffer);
     if (status == MB_ERR)
@@ -337,6 +337,19 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
         HAL_UARTEx_ReceiveToIdle_DMA(&huart3, rx_buffer->msg_data, BUFFER_SIZE);
         __HAL_DMA_DISABLE_IT(&hdma_usart3_rx, DMA_IT_HT);
     }
+}
+
+void _close(void)
+{
+}
+void _lseek(void)
+{
+}
+void _read(void)
+{
+}
+void _write(void)
+{
 }
 /* USER CODE END 4 */
 
