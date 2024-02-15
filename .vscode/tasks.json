@@ -11,37 +11,37 @@
       "command": "time",
       "args": [
         "make",
-        "-sC",
+        "-C",
         "CubeMX"
       ],
       "problemMatcher": [],
       "detail": "Build project"
     },
-    // {
-    //   "label": "Clean",
-    //   "type": "shell",
-    //   "group": "build",
-    //   "command": "make -C CubeMX clean",
-    //   "problemMatcher": [],
-    //   "detail": "Clean project"
-    // },
-    // {
-    //   "type": "shell",
-    //   "label": "Flash",
-    //   "dependsOn": [
-    //     "Build"
-    //   ],
-    //   "command": "make -C CubeMX jflash",
-    //   "options": {
-    //     "cwd": "${workspaceFolder}/build"
-    //   },
-    //   "problemMatcher": [],
-    //   "group": {
-    //     "kind": "build",
-    //     "isDefault": true
-    //   },
-    //   "detail": "Builds project and flashes firmware"
-    // },
+    {
+      "label": "Clean",
+      "type": "shell",
+      "group": "build",
+      "command": "make -C CubeMX clean",
+      "problemMatcher": [],
+      "detail": "Clean project"
+    },
+    {
+      "type": "shell",
+      "label": "Flash",
+      "dependsOn": [
+        "Build"
+      ],
+      "command": "make -C CubeMX jflash",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Builds project and flashes firmware"
+    },
     // {
     //   "type": "shell",
     //   "label": "Flash",
