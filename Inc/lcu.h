@@ -11,7 +11,8 @@
 #include "main.h"
 #include "modbus.h"
 
-void light_level_update(MODBUS_registers*);
+void light_level_update(MODBUS_registers *);
 uint16_t exp_running_average(uint16_t);
+void LCU_update(MODBUS_registers *registers);
 
 #endif /* INC_LCU_H_ */

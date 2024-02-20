@@ -4,6 +4,7 @@
     "cortex-debug.gdbPath": "/home/r6djo/stm32/gcc-arm-none-eabi/bin/arm-none-eabi-gdb",
     "cortex-debug.stlinkPath": "/usr/bin/st-util",
     "files.associations": {
-        "lcu.h": "c"
+        "lcu.h": "c",
+        "main.h": "c"
     }
 }

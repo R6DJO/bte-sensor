@@ -31,3 +31,35 @@ uint16_t exp_running_average(uint16_t new_val)
     fil_val += (new_val - fil_val) >> 3;
     return fil_val;
 }
+
+void LCU_update(MODBUS_registers *registers)
+{
+    // AI[0] - current light level
+    // AO[1] - light threshold
+    // DO[0].0 - mode 1-automatic/0-manual
+    // DO[1].0 - light 1-on/0-off
+    if (registers->DO[0] == 0)
+    {
+        if (registers->DO[1] == 1)
+        {
+            HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+        }
+        else
+        {
+            HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+        }
+    }
+    else
+    {
+        if (registers->AI[0] < registers->AO[1])
+        {
+            HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+            registers->DO[1]=1;
+        }
+        else
+        {
+            HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+            registers->DO[1]=0;
+        }
+    }
+}
