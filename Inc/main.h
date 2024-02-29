@@ -31,8 +31,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-void hex_buf_to_string(uint8_t *buffer, uint8_t size, char *result);
-void UART_Printf(const char* fmt, ...);
+
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -55,6 +54,8 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 uint16_t get_light_level(void);
+void hex_buf_to_string(uint8_t *buffer, uint8_t size, char *result);
+void UART_Printf(const char* fmt, ...);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

@@ -267,13 +267,13 @@ uint16_t get_light_level()
 {
     HAL_ADC_Start(&hadc1);
     HAL_ADC_PollForConversion(&hadc1, 100);
-    uint16_t adc = HAL_ADC_GetValue(&hadc1);
+    uint16_t value = HAL_ADC_GetValue(&hadc1);
     HAL_ADC_Stop(&hadc1);
 #ifdef DEBUG
     // UART_Printf("ADC: %hu [ 0x%04X ]\n", adc / 655, adc);
-    UART_Printf("RAW ADC: 0x%04X\n", adc);
+    UART_Printf("RAW ADC: 0x%04X\n", value);
 #endif // DEBUG
-    return adc;
+    return value;
 }
 
 uint8_t process_buffer()

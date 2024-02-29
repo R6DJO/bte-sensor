@@ -49,14 +49,14 @@ void LCU_update(MODBUS_registers *registers)
             HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
         }
     }
-    else
+    if (registers->DO[0] == 1)
     {
         if (registers->AI[0] < registers->AO[1])
         {
             HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
             registers->DO[1]=1;
         }
-        else
+        if (registers->AI[0] >= registers->AO[1])
         {
             HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
             registers->DO[1]=0;
